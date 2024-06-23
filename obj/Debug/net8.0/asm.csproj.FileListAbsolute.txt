@@ -1,0 +1,14 @@
+D:\c#nangcao\asm\asm\bin\Debug\net8.0\asm.exe
+D:\c#nangcao\asm\asm\bin\Debug\net8.0\asm.deps.json
+D:\c#nangcao\asm\asm\bin\Debug\net8.0\asm.runtimeconfig.json
+D:\c#nangcao\asm\asm\bin\Debug\net8.0\asm.dll
+D:\c#nangcao\asm\asm\bin\Debug\net8.0\asm.pdb
+D:\c#nangcao\asm\asm\obj\Debug\net8.0\asm.GeneratedMSBuildEditorConfig.editorconfig
+D:\c#nangcao\asm\asm\obj\Debug\net8.0\asm.AssemblyInfoInputs.cache
+D:\c#nangcao\asm\asm\obj\Debug\net8.0\asm.AssemblyInfo.cs
+D:\c#nangcao\asm\asm\obj\Debug\net8.0\asm.csproj.CoreCompileInputs.cache
+D:\c#nangcao\asm\asm\obj\Debug\net8.0\asm.dll
+D:\c#nangcao\asm\asm\obj\Debug\net8.0\refint\asm.dll
+D:\c#nangcao\asm\asm\obj\Debug\net8.0\asm.pdb
+D:\c#nangcao\asm\asm\obj\Debug\net8.0\asm.genruntimeconfig.cache
+D:\c#nangcao\asm\asm\obj\Debug\net8.0\ref\asm.dll
