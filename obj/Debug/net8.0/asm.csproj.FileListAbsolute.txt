@@ -12,3 +12,4 @@ D:\c#nangcao\asm\asm\obj\Debug\net8.0\refint\asm.dll
 D:\c#nangcao\asm\asm\obj\Debug\net8.0\asm.pdb
 D:\c#nangcao\asm\asm\obj\Debug\net8.0\asm.genruntimeconfig.cache
 D:\c#nangcao\asm\asm\obj\Debug\net8.0\ref\asm.dll
+D:\c#nangcao\asm\asm\obj\Debug\net8.0\asm.sourcelink.json

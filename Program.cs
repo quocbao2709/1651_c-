@@ -1,416 +1,425 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public abstract class Entity
+
+
+public class Person
 {
-    public int Id { get; set; }
+    // Encapsulation dữ liệu của đối tượng an toàn khỏi sự truy cập và thay đổi từ bên ngoài
+    public int Id { get; protected set; }
+    public string Name { get; protected set; }
+    public string Email { get; protected set; }
+    public string Phone { get; protected set; }
+    // protected, cho thay đổi ở trong lớp person hoặc lớp được kế thừa lớp person
+
+    public Person(int id, string name, string email, string phone)
+    {
+        Id = id;
+        Name = name;
+        Email = email;
+        Phone = phone;
+    }
+
+    public virtual void DisplayInfo()
+    {
+        Console.WriteLine($"ID: {Id}");
+        Console.WriteLine($"Tên: {Name}");
+        Console.WriteLine($"Email: {Email}");
+        Console.WriteLine($"Số điện thoại: {Phone}");
+    }
+    // Polymorphism
+
 }
-
-public class Customer : Entity
+public class Customer : Person
 {
-    public string Name { get; set; }
-    public string Email { get; set; }
-    public string Number { get; set; }
-    public List<Order> Orders { get; set; } = new List<Order>();
+    public List<Order> Orders { get; private set; }
 
-    public void Login()
+    public Customer(int id, string name, string email, string phone)
+        : base(id, name, email, phone)
     {
-        Console.WriteLine("Customer logged in.");
+        Orders = new List<Order>();
     }
 
-    public void Register()
+    public void AddOrder(Order order)
     {
-        Console.WriteLine("Customer registered.");
-    }
-
-    public void BookTable()
-    {
-        Console.Write("Enter your name: ");
-        Name = Console.ReadLine();
-
-        Console.Write("Enter your email: ");
-        Email = Console.ReadLine();
-
-        Console.Write("Enter your phone number: ");
-        Number = Console.ReadLine();
-
-        Console.WriteLine("Select number of seats:");
-        Console.WriteLine("1. 2 seats");
-        Console.WriteLine("2. 4 seats");
-        Console.WriteLine("3. 6 seats");
-        Console.WriteLine("4. Enter manually");
-        Console.Write("Enter your choice: ");
-        int seats = 0;
-
-        switch (Console.ReadLine())
-        {
-            case "1":
-                seats = 2;
-                break;
-            case "2":
-                seats = 4;
-                break;
-            case "3":
-                seats = 6;
-                break;
-            case "4":
-                Console.Write("Enter number of seats: ");
-                seats = int.Parse(Console.ReadLine());
-                break;
-            default:
-                Console.WriteLine("Invalid choice. Defaulting to 2 seats.");
-                seats = 2;
-                break;
-        }
-
-        Table table = new Table { Id = 1, Number = "A1", Seats = seats, Status = "Booked" };
-        Reservation reservation = new Reservation { Id = 1, Customer = this, Table = table, Time = DateTime.Now };
-
-        reservation.Display();
-    }
-
-    public void PlaceOrder(Menu menu)
-    {
-        Order order = new Order { Id = Orders.Count + 1, Customer = this, Status = "Pending", Time = DateTime.Now };
-        bool ordering = true;
-
-        while (ordering)
-        {
-            menu.DisplayMenu();
-            Console.WriteLine("Enter the numbers of the items to add to your order (e.g., '1,2,3' or '1 2 3' or '1.2.3') or type 'done' to finish:");
-            string input = Console.ReadLine();
-
-            if (input.ToLower() == "done")
-            {
-                ordering = false;
-            }
-            else
-            {
-                var separators = new char[] { ',', '.', ' ' };
-                var itemNumbers = input.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (var number in itemNumbers)
-                {
-                    if (int.TryParse(number, out int itemNumber) && itemNumber > 0 && itemNumber <= menu.Items.Count)
-                    {
-                        order.Items.Add(menu.Items[itemNumber - 1]);
-                        Console.WriteLine($"{menu.Items[itemNumber - 1].Name} added to your order.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Invalid selection: {number}. Please try again.");
-                    }
-                }
-            }
-        }
-
         Orders.Add(order);
-
-        Console.WriteLine("Order Summary:");
-        decimal total = 0;
-        foreach (var item in order.Items)
-        {
-            Console.WriteLine($"{item.Name} - ${item.Price}");
-            total += item.Price;
-        }
-        Console.WriteLine($"Total: ${total}");
     }
 
-    public void Pay(Payment payment)
+    //public void ShowOrders()
+    //{
+    //    Console.WriteLine($"Đơn hàng của {Name}:");
+    //    foreach (var order in Orders)
+    //    {
+    //        Console.WriteLine($"- {order}");
+    //    }
+    //}
+    public override void DisplayInfo()
     {
-        Console.WriteLine($"Payment of {payment.Amount} made by {Name}.");
-    }
-    public void ShowOrders()
-    {
+        base.DisplayInfo();
+        Console.WriteLine("Đơn hàng:");
         foreach (var order in Orders)
         {
-            Console.WriteLine($"Order {order.Id} Summary:");
-            foreach (var item in order.Items)
-            {
-                Console.WriteLine($"{item.Name} - ${item.Price}");
-            }
+            order.DisplayOrder();
         }
     }
 }
-
-public class Table : Entity
+public class Staff : Person
 {
-    public string Number { get; set; }
-    public int Seats { get; set; }
-    public string Status { get; set; }
-}
+    public string Position { get; private set; }
 
-public class Payment : Entity
-{
-    public Customer Customer { get; set; }
-    public Order Order { get; set; }
-    public decimal Amount { get; set; }
-    public string Method { get; set; }
-    public string Status { get; set; }
-
-    public void Create()
+    public Staff(int id, string name, string email, string phone, string position)
+        : base(id, name, email, phone)
     {
-        Console.WriteLine("Payment created.");
+        Position = position;
+    }
+    public void CookOrder(Order order)
+    {
+        order.UpdateStatus("Cooking");
+        Console.WriteLine($"Staff is cooking Order ID: {order.Id}");
     }
 
-    public void Update()
+    public void ServeOrder(Order order)
     {
-        Console.WriteLine("Payment updated.");
+        order.UpdateStatus("Served");
+        Console.WriteLine($"chef has served Order ID: {order.Id}");
     }
-
-    public void PrintReceipt()
+    public override void DisplayInfo()
     {
-        Console.WriteLine($"Receipt for {Amount} printed.");
+        base.DisplayInfo();
+        Console.WriteLine($"Position: {Position}");
     }
 }
-
-public class Menu : Entity
+public class Table
 {
-    public string Name { get; set; }
-    public decimal Price { get; set; }
-    public string Description { get; set; }
-    public List<Menu> Items { get; set; } = new List<Menu>();
+    public int Number { get; private set; }
+    public int Seats { get; private set; }
+    public string Status { get; private set; }
 
-    public void Create(Menu item)
+    public Table(int number, int seats, string status)
+    {
+        Number = number;
+        Seats = seats;
+        Status = status;
+    }
+
+    public void BookTable(Customer customer)
+    {
+        Status = "Đã đặt";
+        Console.WriteLine($"Khách hàng {customer.Name} đã đặt bàn số {Number}.");
+    }
+}
+public class Order
+{
+    public int Id { get; private set; }
+    public List<MenuItem> Items { get; private set; }
+    public string Status { get; private set; }
+
+    public Order(int id)
+    {
+        Id = id;
+        Items = new List<MenuItem>();
+        Status = "Pending";
+    }
+
+    public void AddItem(MenuItem item)
     {
         Items.Add(item);
-        Console.WriteLine($"Menu item {item.Name} created.");
+    }
+    public void UpdateStatus(string status)
+    {
+        Status = status;
+    }
+    public void DisplayOrder()
+    {
+        Console.WriteLine($"Order ID: {Id}");
+        Console.WriteLine("Items:");
+        foreach (var item in Items)
+        {
+            Console.WriteLine($"- {item.Name}");
+        }
+        Console.WriteLine($"Status: {Status}");
+    }
+}
+public class Menu
+{
+    private static Menu _instance;
+    public List<MenuItem> Items { get; private set; }
+
+    private Menu()
+    {
+        Items = new List<MenuItem>();
+    }
+    // Singleton Pattern
+    public static Menu Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = new Menu();
+            }
+            return _instance;
+        }
     }
 
-    public void Update(int id, Menu updatedItem)
+    public void AddItem(MenuItemFactory factory)
     {
-        var item = Items.Find(i => i.Id == id);
-        if (item != null)
-        {
-            item.Name = updatedItem.Name;
-            item.Price = updatedItem.Price;
-            item.Description = updatedItem.Description;
-            Console.WriteLine($"Menu item {id} updated.");
-        }
-        else
-        {
-            Console.WriteLine("Item not found.");
-        }
-    }
-
-    public void Delete(int id)
-    {
-        var item = Items.Find(i => i.Id == id);
-        if (item != null)
-        {
-            Items.Remove(item);
-            Console.WriteLine($"Menu item {id} deleted.");
-        }
-        else
-        {
-            Console.WriteLine("Item not found.");
-        }
+        Items.Add(factory.CreateMenuItem());
     }
 
     public void DisplayMenu()
     {
-        Console.WriteLine("Menu:");
+        Console.WriteLine("Thực đơn:");
         for (int i = 0; i < Items.Count; i++)
         {
-            Console.WriteLine($"{i + 1}. {Items[i].Name} - ${Items[i].Price}");
+            Console.WriteLine($"{i + 1}. {Items[i].Name} - {Items[i].Price} VND");
         }
     }
 }
 
-public class Kitchen : Entity
+public class MenuItem
 {
-    public Order Order { get; set; }
-    public string Status { get; set; }
-    public string Ingredients { get; set; }
+    public string Name { get; private set; }
+    public decimal Price { get; private set; }
 
-    public void ReceiveOrder(Order order)
+    public MenuItem(string name, decimal price)
     {
-        Console.WriteLine($"Order {order.Id} received in kitchen.");
+        Name = name;
+        Price = price;
     }
-
-    public void UpdateStatus(string status)
+}
+public abstract class MenuItemFactory
+{
+    public abstract MenuItem CreateMenuItem();
+}
+public class PizzaFactory : MenuItemFactory
+{
+    public override MenuItem CreateMenuItem()
     {
-        Status = status;
-        Console.WriteLine($"Kitchen status updated to {status}.");
-    }
-
-    public void CheckIngredients()
-    {
-        Console.WriteLine("Ingredients checked.");
+        return new MenuItem("Pizza", 100000);
     }
 }
 
-public class Reservation : Entity
+public class PastaFactory : MenuItemFactory
 {
-    public Customer Customer { get; set; }
-    public Table Table { get; set; }
-    public DateTime Time { get; set; }
-
-    public void Create()
+    public override MenuItem CreateMenuItem()
     {
-        Console.WriteLine("Reservation created.");
-    }
-
-    public void Cancel()
-    {
-        Console.WriteLine("Reservation cancelled.");
-    }
-
-    public void Update()
-    {
-        Console.WriteLine("Reservation updated.");
-    }
-
-    public void Display()
-    {
-        Console.WriteLine($"Reservation Details:\nCustomer: {Customer.Name}\nEmail: {Customer.Email}\nPhone: {Customer.Number}\nTable: {Table.Number}\nSeats: {Table.Seats}\nTime: {Time}");
+        return new MenuItem("Pasta", 80000);
     }
 }
 
-public class Order : Entity
+public class SaladFactory : MenuItemFactory
 {
-    public Customer Customer { get; set; }
-    public List<Menu> Items { get; set; } = new List<Menu>();
-    public string Status { get; set; }
-    public DateTime Time { get; set; }
-
-    public void Create()
+    public override MenuItem CreateMenuItem()
     {
-        Console.WriteLine("Order created.");
-    }
-
-    public void Update()
-    {
-        Console.WriteLine("Order updated.");
-    }
-    public void ProcessOrder()
-    {
-        Status = "Processed";
-        Console.WriteLine("Order processed and ready to be served.");
+        return new MenuItem("Salad", 50000);
     }
 }
+
+public class DrinkFactory : MenuItemFactory
+{
+    public override MenuItem CreateMenuItem()
+    {
+        return new MenuItem("Nước", 10000);
+    }
+}
+
+
 
 public class Program
-{
-    static void Main()
     {
-        List<Customer> customers = new List<Customer>();
-        Menu menu = new Menu();
-
-        // Creating menu items
-        menu.Create(new Menu { Id = 1, Name = "Pizza", Price = 9.99M, Description = "Delicious cheese pizza" });
-        menu.Create(new Menu { Id = 2, Name = "Pasta", Price = 12.99M, Description = "Creamy Alfredo pasta" });
-        menu.Create(new Menu { Id = 3, Name = "Salad", Price = 7.99M, Description = "Fresh garden salad" });
-        menu.Create(new Menu { Id = 4, Name = "Water", Price = 1.99M, Description = "Bottled water" });
-        menu.Create(new Menu { Id = 5, Name = "Wine", Price = 19.99M, Description = "Red wine" });
-
-        bool exit = false;
-        while (!exit)
+        static void Main()
         {
-            Console.WriteLine("\nRestaurant Management System");
-            Console.WriteLine("1. Book Table and Show Reservations");
-            Console.WriteLine("2. Place Order");
-            Console.WriteLine("3. Show and Process Orders");
-            Console.WriteLine("4. Calculate and Print Bill");
-            Console.WriteLine("5. Exit");
-            Console.Write("Enter your choice: ");
-            string choice = Console.ReadLine();
+            List<Customer> customers = new List<Customer>();
+            List<Table> tables = new List<Table>();
+            List<Staff> staffs = new List<Staff>();
+            Menu menu = Menu.Instance;
 
-            switch (choice)
+
+                menu.AddItem(new PizzaFactory());
+                menu.AddItem(new PastaFactory());
+                menu.AddItem(new SaladFactory());
+                menu.AddItem(new DrinkFactory());
+
+
+            tables.Add(new Table(1, 2, "Trống"));
+            tables.Add(new Table(2, 4, "Trống"));
+            tables.Add(new Table(3, 6, "Trống"));
+
+            staffs.Add(new Staff(1, "Nguyễn Văn tuan", "abc.com", "0123456789", "Phục vụ"));
+            staffs.Add(new Staff(2, "nguyen thi kim", "cba.com", "0987654321", "Đầu bếp"));
+
+            bool exit = false;
+            while (!exit)
             {
-                case "1":
-                    Customer customer = new Customer();
-                    customer.BookTable();
-                    customers.Add(customer);
-                    Console.WriteLine("Current Reservations:");
-                    foreach (var cust in customers)
-                    {
-                        cust.BookTable();
-                    }
-                    break;
-                case "2":
-                    if (customers.Count == 0)
-                    {
-                        Console.WriteLine("No reservations found. Please book a table first.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Select customer to place order:");
+            Console.WriteLine("\nHệ thống quản lý nhà hàng");
+            Console.WriteLine("1. Đặt bàn");
+            Console.WriteLine("2. Hiển thị đặt chỗ");
+            Console.WriteLine("3. Đặt món");
+            Console.WriteLine("4. Chế biến món ăn");
+            Console.WriteLine("5. Đem món ra bàn");
+            Console.WriteLine("6. Hiển thị các đơn hàng");
+            Console.WriteLine("7. Thoát");
+            Console.Write("Nhập lựa chọn của bạn: ");
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        Console.Write("Nhập tên của bạn: ");
+                        string name = Console.ReadLine();
+                        Console.Write("Nhập email của bạn: ");
+                        string email = Console.ReadLine();
+                        Console.Write("Nhập số điện thoại của bạn: ");
+                        string phone = Console.ReadLine();
+
+                        Customer customer = new Customer(customers.Count + 1, name, email, phone);
+                        customers.Add(customer);
+
+                        Console.WriteLine("Chọn bàn để đặt:");
+                        for (int i = 0; i < tables.Count; i++)
+                        {
+                            Console.WriteLine($"{i + 1}. Bàn số {tables[i].Number} - {tables[i].Seats} chỗ - {tables[i].Status}");
+                        }
+                        Console.Write("Nhập số thứ tự của bàn: ");
+                        int tableIndex = int.Parse(Console.ReadLine()) - 1;
+
+                        if (tableIndex >= 0 && tableIndex < tables.Count)
+                        {
+                            tables[tableIndex].BookTable(customer);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Lựa chọn không hợp lệ.");
+                        }
+                        break;
+
+                    case "2":
+                        Console.WriteLine("Danh sách đặt chỗ:");
+                        foreach (var table in tables)
+                        {
+                            if (table.Status == "Đã đặt")
+                            {
+                                Console.WriteLine($"Bàn số {table.Number} - {table.Seats} chỗ - {table.Status}");
+                            }
+                        }
+                        break;
+
+                    case "3":
+                        if (customers.Count == 0)
+                        {
+                            Console.WriteLine("Không có khách hàng nào.");
+                            break;
+                        }
+
+                        Console.WriteLine("Chọn khách hàng để đặt món:");
                         for (int i = 0; i < customers.Count; i++)
                         {
                             Console.WriteLine($"{i + 1}. {customers[i].Name}");
                         }
+                        Console.Write("Nhập số thứ tự của khách hàng: ");
                         int customerIndex = int.Parse(Console.ReadLine()) - 1;
+
                         if (customerIndex >= 0 && customerIndex < customers.Count)
                         {
-                            customers[customerIndex].PlaceOrder(menu);
+                            Customer selectedCustomer = customers[customerIndex];
+                            Order newOrder = new Order(selectedCustomer.Orders.Count + 1);
+
+                            bool ordering = true;
+                            while (ordering)
+                            {
+                                menu.DisplayMenu();
+                                Console.Write("Nhập số thứ tự của món để thêm vào đơn hàng (hoặc gõ 'done' để hoàn tất): ");
+                                string input = Console.ReadLine();
+
+                                if (input.ToLower() == "done")
+                                {
+                                    ordering = false;
+                                    selectedCustomer.AddOrder(newOrder);
+                                }
+                                else
+                                {
+                                    int itemIndex = int.Parse(input) - 1;
+                                    if (itemIndex >= 0 && itemIndex < menu.Items.Count)
+                                    {
+                                        newOrder.AddItem(menu.Items[itemIndex]);
+                                        Console.WriteLine($"Đã thêm {menu.Items[itemIndex].Name} vào đơn hàng.");
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Lựa chọn không hợp lệ.");
+                                    }
+                                }
+                            }
                         }
                         else
                         {
-                            Console.WriteLine("Invalid selection.");
+                            Console.WriteLine("Lựa chọn không hợp lệ.");
                         }
-                    }
-                    break;
-                case "3":
-                    if (customers.Count == 0)
-                    {
-                        Console.WriteLine("No orders found.");
-                    }
-                    else
-                    {
-                        foreach (var cust in customers)
+                        break;
+
+                    case "4":
+                        if (customers.Count == 0)
                         {
-                            cust.ShowOrders();
+                            Console.WriteLine("Không có khách hàng nào.");
+                            break;  
                         }
-                        Console.WriteLine("Process orders for customers? (yes/no)");
-                        if (Console.ReadLine().ToLower() == "yes")
-                        {
-                            foreach (var cust in customers)
-                            {
-                                foreach (var order in cust.Orders)
+                            foreach (var customer1 in customers)
+                            {   
+                                foreach (var order in customer1.Orders)
                                 {
-                                    order.ProcessOrder();
+
+                                    if (order.Status == "Pending")
+                                    {
+                                        staffs[0].CookOrder(order); // Assuming the first staff cooks the order
+                                        order.UpdateStatus("Cooking");
+                                    }
+                                }
+                            }
+                            Console.WriteLine("Tất cả các món ăn đã được chế biến.");
+                        
+                        break;
+
+                    case "5":
+                        if (customers.Count == 0)
+                        {
+                            Console.WriteLine("Không có khách hàng nào.");
+                            break;
+                        }
+
+                        foreach (var customer1 in customers)
+                        {
+                            foreach (var order in customer1.Orders)
+                            {
+                                if (order.Status == "Cooking")
+                                {
+                                    staffs[0].ServeOrder(order);// Assuming the first staff serves the order
+                                    order.UpdateStatus("Served");
                                 }
                             }
                         }
-                    }
-                    break;
-                case "4":
-                    if (customers.Count == 0)
-                    {
-                        Console.WriteLine("No orders found.");
-                    }
-                    else
-                    {
+                        Console.WriteLine("Tất cả các món ăn đã được phục vụ.");
+                        break;
+
+                    case "6":
+                        Console.WriteLine("Danh sách đơn hàng:");
                         foreach (var cust in customers)
                         {
-                            foreach (var order in cust.Orders)
-                            {
-                                decimal total = 0;
-                                Console.WriteLine($"Bill for {cust.Name}:");
-                                foreach (var item in order.Items)
-                                {
-                                    Console.WriteLine($"{item.Name} - ${item.Price}");
-                                    total += item.Price;
-                                }
-                                Console.WriteLine($"Total: ${total}");
-                                Payment payment = new Payment { Id = 1, Customer = cust, Order = order, Amount = total, Method = "Credit Card", Status = "Paid" };
-                                cust.Pay(payment);
-                                payment.PrintReceipt();
-                            }
+                            cust.DisplayInfo();
                         }
-                    }
-                    break;
-                case "5":
-                    exit = true;
-                    break;
-                default:
-                    Console.WriteLine("Invalid choice. Please try again.");
-                    break;
+                        break;
+                    case "7":
+                        exit = true;
+                        break;
+
+                    default:
+                        Console.WriteLine("Lựa chọn không hợp lệ.");
+                        break;
+                }
             }
         }
     }
-}
+
 
 //1. đặt bàn bao gồm có tên , số, email, số lượng bàn ghế
 //2.chọn món trong menu, được chọn nhiều món, có thể gọi thêm nước hoặc rượu. được gọi nhiều lần
